@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JOIN Careers – 인사 채용사이트 (개선된 레이아웃)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 토스트 애니메이션 */
+    .toast-enter { transform: translate(-50%, 8px); opacity: 0; }
+    .toast-enter-active { transform: translate(-50%, 0); opacity: 1; transition: all 200ms ease; }
+    .toast-exit { transform: translate(-50%, 0); opacity: 1; }
+    .toast-exit-active { transform: translate(-50%, 8px); opacity: 0; transition: all 200ms ease; }
+    /* 모달 스크롤 락 */
+    body.modal-open { overflow: hidden; }
+  </style>
+</head>
+<body class="min-h-screen bg-white text-gray-900">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200">
+    <div class="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
+      <a href="#" class="font-extrabold text-xl tracking-tight flex items-center gap-2">
+        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white">J</span>
+        JOIN Careers
+      </a>
+      <nav class="flex items-center gap-1 text-sm">
+        <button data-nav="jobs" class="px-3 py-2 rounded-xl hover:bg-emerald-50 text-emerald-700 bg-emerald-100">채용공고</button>
+        <button data-nav="about" class="px-3 py-2 rounded-xl hover:bg-gray-100">회사 소개</button>
+        <button data-nav="admin" class="px-3 py-2 rounded-xl hover:bg-gray-100">관리자</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="border-b border-gray-200 bg-gradient-to-b from-emerald-50 to-white">
+    <div class="mx-auto max-w-7xl px-6 py-14">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold leading-tight">
+            숫자로 성장하는 팀,<br/>사람을 중심에 두는 채용
+          </h1>
+          <p class="mt-4 text-gray-600">데이터 기반 의사결정과 따뜻한 문화가 만나는 곳. 당신의 다음 성장을 응원합니다.</p>
+          <ul class="mt-5 text-sm text-gray-700 space-y-2">
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-emerald-500"></span>하이브리드 근무 · 유연한 시간</li>
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-emerald-500"></span>성장 예산(교육/도서/자격) · 러닝데이</li>
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-emerald-500"></span>명확한 목표와 피드백 · 공정한 보상</li>
+          </ul>
+        </div>
+        <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+          <p class="text-sm font-medium">빠른 검색</p>
+          <p class="text-xs text-gray-500">키워드, 부문, 근무지로 공고를 찾아보세요.</p>
+          <div class="mt-4 grid grid-cols-3 gap-2">
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">#회계</span>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">#HR</span>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">#원가</span>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">#Python</span>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">#공정</span>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">#데이터</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter Bar (sticky) -->
+  <div class="sticky top-[56px] z-30 bg-white/85 backdrop-blur border-b border-gray-200">
+    <div class="mx-auto max-w-7xl px-6 py-3">
+      <div class="flex flex-wrap items-end gap-3">
+        <div class="flex-1 min-w-[240px]">
+          <label class="block text-xs font-medium text-gray-600">키워드</label>
+          <input id="kw" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="예: 회계, HR, 공정, Python..."/>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600">부문</label>
+          <select id="filter-team" class="mt-1 rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600">근무지</label>
+          <select id="filter-loc" class="mt-1 rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600">고용형태</label>
+          <select id="filter-type" class="mt-1 rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jobs Section -->
+  <section id="section-jobs" class="mx-auto max-w-7xl px-6 py-10">
+    <div id="jobs-container" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3"></div>
+  </section>
+
+  <!-- About Section -->
+  <section id="section-about" class="hidden mx-auto max-w-7xl px-6 py-12">
+    <div class="grid md:grid-cols-2 gap-10 items-start">
+      <div>
+        <h2 class="text-2xl font-extrabold">우리가 일하는 방식</h2>
+        <p class="mt-3 text-gray-700">우리는 <b>데이터로 말하고</b>, <b>사람을 존중</b>하며, 작은 실험을 통해 빠르게 학습합니다. 결과와 성장 모두를 중시합니다.</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li>• 주 단위 목표(OKR)와 투명한 리뷰</li>
+          <li>• 원격 협업 툴과 문서 중심 문화</li>
+          <li>• 공정한 보상과 명확한 커리어 레벨</li>
+        </ul>
+      </div>
+      <div class="rounded-3xl border border-gray-200 p-6 bg-white shadow-sm">
+        <h3 class="font-semibold">복지 & 제도(예시)</h3>
+        <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
+          <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">유연근무/하이브리드</div>
+          <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">교육·자격 지원</div>
+          <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">웰컴키트/온보딩</div>
+          <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">건강검진/단체보험</div>
+          <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">경조사/명절 선물</div>
+          <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">리프레시 휴가</div>
+        </div>
+        <p class="mt-4 text-xs text-gray-500">실제 회사 정책에 맞게 항목을 자유롭게 편집하세요.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Admin Section -->
+  <section id="section-admin" class="hidden mx-auto max-w-7xl px-6 py-12">
+    <div class="flex flex-wrap items-end gap-3">
+      <div class="flex-1 min-w-[240px]">
+        <label class="block text-xs font-medium text-gray-600">검색</label>
+        <input id="admin-q" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="이름, 이메일, 내용 등"/>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600">공고</label>
+        <select id="admin-job" class="mt-1 rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btn-csv" class="px-3 py-2 rounded-xl border border-gray-300 hover:bg-gray-50">CSV</button>
+        <button id="btn-json" class="px-3 py-2 rounded-xl border border-gray-300 hover:bg-gray-50">JSON</button>
+        <button id="btn-clear" class="px-3 py-2 rounded-xl border border-gray-300 hover:bg-gray-50">전체 삭제</button>
+      </div>
+    </div>
+    <div id="admin-list" class="mt-6 grid gap-4"></div>
+  </section>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 z-50 items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" data-close></div>
+    <div class="relative w-full max-w-2xl mx-4 rounded-2xl bg-white shadow-xl border border-gray-200">
+      <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+        <h3 id="modal-title" class="text-lg font-semibold"></h3>
+        <button class="p-2 rounded-full hover:bg-gray-100" aria-label="닫기" data-close>✕</button>
+      </div>
+      <div class="p-6">
+        <form id="apply-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium">이름 *</label>
+              <input name="name" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="홍길동" required />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">이메일 *</label>
+              <input type="email" name="email" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="you@example.com" required />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">연락처</label>
+              <input name="phone" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="010-0000-0000" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">이력서 링크</label>
+              <input name="resumeUrl" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="Google Drive / Notion / PDF URL" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">포트폴리오 링크</label>
+              <input name="portfolioUrl" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="선택 (GitHub/Notion 등)" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium">자기소개 / 지원동기</label>
+            <textarea name="coverLetter" rows="5" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="간단히 작성해 주세요"></textarea>
+          </div>
+          <label class="flex items-start gap-2 text-sm">
+            <input type="checkbox" name="agree" class="mt-1" required />
+            <span>(필수) 개인정보 수집·이용에 동의합니다. 채용 절차 종료 후 <b>6개월</b> 보관 후 파기합니다.</span>
+          </label>
+          <p id="apply-error" class="text-sm text-red-600 hidden"></p>
+          <div class="pt-2 flex items-center gap-3">
+            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">지원서 제출</button>
+            <span class="text-xs text-gray-500">제출 즉시 로컬에 저장됩니다.</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-200">
+    <div class="mx-auto max-w-7xl px-6 py-10 text-sm text-gray-500 flex flex-wrap items-center justify-between gap-3">
+      <p>© <span id="year"></span> JOIN Co., Ltd. All rights reserved.</p>
+      <div class="flex items-center gap-4">
+        <a href="#" class="hover:underline">개인정보 처리방침</a>
+        <a href="mailto:career@join.example" class="hover:underline">문의 career@join.example</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div class="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow-lg"></div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // 데이터
+    // -----------------------------
+    const INITIAL_JOBS = [
+      {
+        id: "JD-24001",
+        title: "재무/회계 담당자",
+        team: "경영지원",
+        location: "충북 음성 (하이브리드)",
+        type: "정규직",
+        tags: ["회계", "결산", "ERP"],
+        deadline: "2025-10-31",
+        highlight: "월별 결산 고도화, 비용 통제 및 분석",
+        description: "월/분기/연 결산, 세무 기본, 원가/관리회계 및 KPI 리포팅. Python/파워쿼리 사용 경험 우대.",
+        responsibilities: [
+          "월별 결산 및 재무제표 작성",
+          "손익/현금흐름 분석 및 경영 리포트",
+          "ERP 데이터 검증 및 프로세스 개선",
+        ],
+        qualifications: [
+          "회계/재무 3년+ 또는 동등 역량",
+          "엑셀 고급 (피벗/파워쿼리)",
+          "커뮤니케이션 및 문서화 능력",
+        ],
+        preferred: [
+          "제조업 원가 경험",
+          "Python/SQL 데이터 핸들링",
+          "재경관리사/회계 관련 자격",
+        ],
+      },
+      {
+        id: "JD-24002",
+        title: "인사(HR) 매니저",
+        team: "경영지원",
+        location: "서울 (부분 원격)",
+        type: "정규직",
+        tags: ["채용", "평가", "조직문화"],
+        deadline: "상시채용",
+        highlight: "채용 브랜딩과 데이터 기반 HR 운영",
+        description: "채용 전과정 운영, 평가/보상 제도 운영, HR 데이터 분석 및 리포팅. 조직문화 프로그램 기획.",
+        responsibilities: [
+          "채용 기획 및 운영(신입/경력)",
+          "성과관리 제도 운영",
+          "온보딩/러닝/문화 프로그램 기획",
+        ],
+        qualifications: [
+          "HR 2년+ 또는 동등 역량",
+          "주도적 실행력과 협업 능력",
+          "데이터 기반 문제해결",
+        ],
+        preferred: ["제조/식품/농업 산업 이해", "노무 기본 지식", "콘텐츠/브랜딩 경험"],
+      },
+      {
+        id: "JD-24003",
+        title: "공장 운영관리(생산) 담당자",
+        team: "생산/공정",
+        location: "충북 음성 (상주)",
+        type: "정규직",
+        tags: ["생산관리", "원가", "공정개선"],
+        deadline: "2025-11-30",
+        highlight: "공정 데이터 기반 원가/수율 개선",
+        description: "라인 운영관리, 원가/수율 관리, 공정 개선 프로젝트 리딩. 안전/품질/ESG 기본 준수.",
+        responsibilities: [
+          "생산 계획/실적 관리",
+          "원가/수율/설비 OEE 분석",
+          "개선 과제 발굴 및 실행",
+        ],
+        qualifications: [
+          "생산/공정 2년+ 또는 동등 역량",
+          "데이터 분석 기본 (엑셀/구글시트)",
+          "현장 커뮤니케이션",
+        ],
+        preferred: ["식품/축산 공정 경험", "통계/파이썬", "안전/품질 지식"],
+      },
+    ];
+
+    // -----------------------------
+    // 헬퍼
+    // -----------------------------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function badge(text){
+      const span = document.createElement('span');
+      span.className = 'inline-flex items-center px-2 py-0.5 text-xs rounded-full border border-gray-300';
+      span.textContent = text;
+      return span;
+    }
+
+    function download(filename, text, mime = 'text/plain'){
+      const blob = new Blob([text], { type: mime+';charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    function toCSV(rows){
+      if(!rows.length) return '';
+      const headers = Object.keys(rows[0]);
+      const esc = v => '"'+String(v ?? '').replace(/"/g,'""')+'"';
+      const lines = [headers.join(','), ...rows.map(r=>headers.map(h=>esc(r[h])).join(','))];
+      return lines.join('\n');
+    }
+
+    function showToast(msg){
+      const toast = $('#toast');
+      const box = $('#toast > div');
+      box.textContent = msg;
+      toast.classList.remove('hidden','toast-exit','toast-exit-active');
+      toast.classList.add('toast-enter');
+      requestAnimationFrame(()=>toast.classList.add('toast-enter-active'));
+      setTimeout(()=>{
+        toast.classList.remove('toast-enter','toast-enter-active');
+        toast.classList.add('toast-exit');
+        requestAnimationFrame(()=>toast.classList.add('toast-exit-active'));
+        setTimeout(()=>toast.classList.add('hidden'), 200);
+      }, 2000);
+    }
+
+    function dday(deadline){
+      if(!deadline || deadline === '상시채용') return null;
+      const left = Math.ceil((new Date(deadline).getTime() - Date.now())/ (1000*60*60*24));
+      return left >= 0 ? left : null;
+    }
+
+    // -----------------------------
+    // 네비게이션
+    // -----------------------------
+    function setPage(key){
+      const sections = { jobs: '#section-jobs', about: '#section-about', admin: '#section-admin' };
+      Object.entries(sections).forEach(([k, sel])=>{
+        $(sel).classList.toggle('hidden', k !== key);
+      });
+      $$('nav [data-nav]').forEach(btn=>{
+        const active = btn.dataset.nav===key;
+        btn.classList.toggle('bg-emerald-100', active);
+        btn.classList.toggle('text-emerald-700', active);
+        btn.classList.toggle('hover:bg-emerald-50', active);
+        btn.classList.toggle('bg-gray-900', false);
+        btn.classList.toggle('text-white', false);
+      });
+      location.hash = key;
+    }
+
+    $$('nav [data-nav]').forEach(btn=>btn.addEventListener('click',()=>setPage(btn.dataset.nav)));
+    window.addEventListener('hashchange', ()=>{
+      const k = location.hash.replace('#','') || 'jobs';
+      setPage(k);
+    });
+
+    // -----------------------------
+    // Jobs 렌더링 & 필터
+    // -----------------------------
+    const state = {
+      jobs: INITIAL_JOBS,
+      filters: { kw:'', team:'전체', loc:'전체', type:'전체' },
+      applyJob: null,
+    };
+
+    function buildSelectOptions(select, items){
+      select.innerHTML = '';
+      items.forEach(v=>{
+        const opt = document.createElement('option');
+        opt.textContent = v; opt.value = v; select.appendChild(opt);
+      });
+    }
+
+    function refreshFilters(){
+      const teams = ['전체', ...new Set(state.jobs.map(j=>j.team))];
+      const locs = ['전체', ...new Set(state.jobs.map(j=>j.location))];
+      const types = ['전체', ...new Set(state.jobs.map(j=>j.type))];
+      buildSelectOptions($('#filter-team'), teams);
+      buildSelectOptions($('#filter-loc'), locs);
+      buildSelectOptions($('#filter-type'), types);
+    }
+
+    function renderJobs(){
+      const wrap = $('#jobs-container');
+      wrap.innerHTML = '';
+      const kw = state.filters.kw.trim().toLowerCase();
+      const list = state.jobs.filter(j=>{
+        const matchKw = kw ? [j.title, j.highlight, j.description, ...(j.tags||[])].join(' ').toLowerCase().includes(kw) : true;
+        const matchTeam = state.filters.team==='전체' || j.team===state.filters.team;
+        const matchLoc = state.filters.loc==='전체' || j.location===state.filters.loc;
+        const matchType = state.filters.type==='전체' || j.type===state.filters.type;
+        return matchKw && matchTeam && matchLoc && matchType;
+      });
+
+      if(!list.length){
+        const empty = document.createElement('div');
+        empty.className = 'col-span-full text-center text-sm text-gray-500 border border-gray-200 rounded-2xl p-8';
+        empty.textContent = '조건에 맞는 공고가 없습니다. 필터를 변경해 보세요.';
+        wrap.appendChild(empty);
+        return;
+      }
+
+      list.forEach(job=>{
+        const card = document.createElement('div');
+        card.className = 'rounded-2xl border border-gray-200 p-5 bg-white shadow-sm hover:shadow-md transition';
+        const head = document.createElement('div');
+        head.className = 'flex flex-wrap items-center justify-between gap-3';
+        const left = document.createElement('div');
+        const h4 = document.createElement('h4'); h4.className='text-lg font-semibold'; h4.textContent=job.title;
+        const p = document.createElement('p'); p.className='text-sm text-gray-600 mt-1'; p.textContent=job.highlight;
+        left.append(h4,p);
+        const right = document.createElement('div'); right.className='flex items-center gap-2';
+        right.append(badge(job.team), badge(job.type), badge(job.location));
+        const d = dday(job.deadline); if(d!==null) right.append(badge('D-'+d));
+        head.append(left,right);
+
+        const tags = document.createElement('div'); tags.className='mt-4 flex flex-wrap gap-2';
+        (job.tags||[]).forEach(t=>{
+          const s = document.createElement('span'); s.className='text-xs bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full'; s.textContent = '#'+t; tags.appendChild(s);
+        });
+
+        const desc = document.createElement('p'); desc.className='mt-3 text-sm text-gray-700'; desc.textContent=job.description;
+
+        const grid = document.createElement('div'); grid.className='mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm';
+        const ul1 = document.createElement('ul'); ul1.className='list-disc list-inside space-y-1';
+        (job.responsibilities||[]).forEach(r=>{ const li=document.createElement('li'); li.textContent=r; ul1.appendChild(li); });
+        const col2 = document.createElement('div');
+        const qh = document.createElement('p'); qh.className='font-medium'; qh.textContent='자격요건';
+        const ul2 = document.createElement('ul'); ul2.className='list-disc list-inside space-y-1';
+        (job.qualifications||[]).forEach(q=>{ const li=document.createElement('li'); li.textContent=q; ul2.appendChild(li); });
+        col2.append(qh, ul2);
+        if(job.preferred?.length){
+          const ph = document.createElement('p'); ph.className='mt-2 font-medium'; ph.textContent='우대사항';
+          const ul3 = document.createElement('ul'); ul3.className='list-disc list-inside space-y-1';
+          job.preferred.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul3.appendChild(li); });
+          col2.append(ph, ul3);
+        }
+        grid.append(ul1, col2);
+
+        const foot = document.createElement('div'); foot.className='mt-5 flex items-center justify-between';
+        const meta = document.createElement('p'); meta.className='text-xs text-gray-500'; meta.innerHTML = `공고 ID: <b>${job.id}</b> · 마감: ${job.deadline}`;
+        const btn = document.createElement('button'); btn.className='px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700'; btn.textContent='지원하기';
+        btn.addEventListener('click',()=>openModal(job));
+        foot.append(meta, btn);
+
+        card.append(head, tags, desc, grid, foot);
+        wrap.appendChild(card);
+      });
+    }
+
+    // 필터 이벤트
+    $('#kw').addEventListener('input', e=>{ state.filters.kw = e.target.value; renderJobs(); });
+    $('#filter-team').addEventListener('change', e=>{ state.filters.team = e.target.value; renderJobs(); });
+    $('#filter-loc').addEventListener('change', e=>{ state.filters.loc = e.target.value; renderJobs(); });
+    $('#filter-type').addEventListener('change', e=>{ state.filters.type = e.target.value; renderJobs(); });
+
+    // -----------------------------
+    // 모달 & 지원 폼
+    // -----------------------------
+    function openModal(job){
+      state.applyJob = job;
+      $('#modal-title').textContent = `${job.title} · 지원하기`;
+      $('#apply-form').reset();
+      $('#apply-error').classList.add('hidden');
+      $('#modal').classList.remove('hidden');
+      $('#modal').classList.add('flex');
+      document.body.classList.add('modal-open');
+    }
+
+    function closeModal(){
+      $('#modal').classList.add('hidden');
+      $('#modal').classList.remove('flex');
+      document.body.classList.remove('modal-open');
+      state.applyJob = null;
+    }
+
+    $$('#modal [data-close]').forEach(el=>el.addEventListener('click', closeModal));
+
+    $('#apply-form').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const data = Object.fromEntries(fd.entries());
+      if(!data.name || !data.email){
+        const err = $('#apply-error');
+        err.textContent = '필수 항목을 확인해 주세요 (이름/이메일/개인정보 동의)';
+        err.classList.remove('hidden');
+        return;
+      }
+      const entry = {
+        id: `APP-${Date.now()}`,
+        jobId: state.applyJob.id,
+        jobTitle: state.applyJob.title,
+        submittedAt: new Date().toISOString(),
+        name: data.name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        resumeUrl: data.resumeUrl || '',
+        portfolioUrl: data.portfolioUrl || '',
+        coverLetter: data.coverLetter || '',
+        agree: !!data.agree,
+      };
+      const prev = JSON.parse(localStorage.getItem('applications')||'[]');
+      localStorage.setItem('applications', JSON.stringify([entry, ...prev]));
+      closeModal();
+      showToast('지원서가 제출되었습니다! ✨ (브라우저 로컬에 저장)');
+      refreshAdmin();
+    });
+
+    // -----------------------------
+    // 관리자 섹션
+    // -----------------------------
+    function getApps(){
+      return JSON.parse(localStorage.getItem('applications')||'[]');
+    }
+
+    function refreshAdmin(){
+      const apps = getApps();
+      // 공고 셀렉트
+      const ids = ['전체', ...new Set(apps.map(a=>`${a.jobId} · ${a.jobTitle}`))];
+      const sel = $('#admin-job');
+      const cur = sel.value || '전체';
+      buildSelectOptions(sel, ids);
+      sel.value = cur;
+
+      const kw = ($('#admin-q').value||'').trim().toLowerCase();
+      const jobKey = sel.value || '전체';
+      const filtered = apps.filter(a=>{
+        const matchKw = kw ? [a.name, a.email, a.phone, a.coverLetter, a.jobTitle].join(' ').toLowerCase().includes(kw) : true;
+        const matchJob = jobKey==='전체' || `${a.jobId} · ${a.jobTitle}` === jobKey;
+        return matchKw && matchJob;
+      });
+
+      const box = $('#admin-list');
+      box.innerHTML='';
+      if(!filtered.length){
+        const empty = document.createElement('div');
+        empty.className = 'text-center text-sm text-gray-500 border border-gray-200 rounded-2xl p-8';
+        empty.textContent = '표시할 지원서가 없습니다.';
+        box.appendChild(empty);
+      } else {
+        filtered.forEach(a=>{
+          const card = document.createElement('div'); card.className='rounded-2xl border border-gray-200 p-4 bg-white';
+          const top = document.createElement('div'); top.className='flex flex-wrap items-center justify-between gap-3';
+          const l = document.createElement('div');
+          const name = document.createElement('p'); name.className='font-medium'; name.innerHTML = `${a.name} <span class="text-xs text-gray-500">(${a.email})</span>`;
+          const sub = document.createElement('p'); sub.className='text-xs text-gray-500'; sub.textContent = `지원 공고: ${a.jobId} · ${a.jobTitle}`;
+          l.append(name, sub);
+          const r = badge(new Date(a.submittedAt).toLocaleString());
+          top.append(l, r);
+
+          const grid = document.createElement('div'); grid.className='mt-3 grid md:grid-cols-2 gap-3 text-sm';
+          const col1 = document.createElement('div'); col1.className='space-y-1';
+          const p1 = document.createElement('p'); p1.innerHTML = `<b>연락처:</b> ${a.phone || '-'}`;
+          const p2 = document.createElement('p'); p2.innerHTML = `<b>이력서:</b> ${a.resumeUrl ? `<a class="text-emerald-700 underline" href="${a.resumeUrl}" target="_blank" rel="noreferrer">열기</a>` : '-'}`;
+          const p3 = document.createElement('p'); p3.innerHTML = `<b>포트폴리오:</b> ${a.portfolioUrl ? `<a class="text-emerald-700 underline" href="${a.portfolioUrl}" target="_blank" rel="noreferrer">열기</a>` : '-'}`;
+          col1.append(p1,p2,p3);
+          const col2 = document.createElement('div');
+          const ch = document.createElement('p'); ch.className='font-medium'; ch.textContent='자기소개/지원동기';
+          const cv = document.createElement('p'); cv.className='mt-1 whitespace-pre-wrap text-gray-700'; cv.textContent = a.coverLetter || '(내용 없음)';
+          col2.append(ch, cv);
+          grid.append(col1, col2);
+
+          card.append(top, grid);
+          box.appendChild(card);
+        });
+      }
+
+      // CSV/JSON 버튼 상태
+      $('#btn-csv').disabled = filtered.length === 0;
+      $('#btn-json').disabled = filtered.length === 0;
+
+      // 내보내기 핸들러 갱신
+      $('#btn-json').onclick = ()=>{
+        download(`applications-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(filtered, null, 2), 'application/json');
+      };
+      $('#btn-csv').onclick = ()=>{
+        if(!filtered.length) return;
+        const headers = ["id","submittedAt","jobId","jobTitle","name","email","phone","resumeUrl","portfolioUrl","coverLetter","agree"]; 
+        const rows = filtered.map(a => Object.fromEntries(headers.map(h=>[h, a[h]])));
+        download(`applications-${new Date().toISOString().slice(0,10)}.csv`, toCSV(rows), 'text/csv');
+      };
+    }
+
+    $('#admin-q').addEventListener('input', refreshAdmin);
+    $('#admin-job').addEventListener('change', refreshAdmin);
+    $('#btn-clear').addEventListener('click', ()=>{
+      if(!confirm('로컬에 저장된 모든 지원서를 삭제할까요?')) return;
+      localStorage.removeItem('applications');
+      refreshAdmin();
+    });
+
+    // -----------------------------
+    // 초기화
+    // -----------------------------
+    (function init(){
+      $('#year').textContent = new Date().getFullYear();
+      // 필터 옵션 구성
+      refreshFilters();
+      // 초기 렌더
+      renderJobs();
+      // URL 해시 페이지 적용
+      const key = location.hash.replace('#','') || 'jobs';
+      setPage(key);
+      // 관리자 초기화
+      refreshAdmin();
+    })();
+  </script>
+</body>
+</html>
